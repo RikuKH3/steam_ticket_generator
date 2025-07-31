@@ -143,7 +143,7 @@ begin
   Writeln('Create configs.user.ini file? [Y/N]');
   Readln(s);
   if (Trim(LowerCase(s)) = 'y') then begin
-    CreateConfig(SteamID, EncodedTicket, String(UTF8ToString(SteamAPI_ISteamFriends_GetPersonaName(SteamAPI_SteamFriends_v018))));
+    CreateConfig(SteamID, EncodedTicket, UTF8ToString(SteamAPI_ISteamFriends_GetPersonaName(SteamAPI_SteamFriends_v018)));
     Writeln('configs.user.ini created successfully.');
   end;
 end;
