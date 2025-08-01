@@ -73,7 +73,7 @@ begin
   end;
 end;
 
-procedure CreateConfig(SteamID: UInt64; const Ticket, PersonaName: string);
+procedure CreateConfig(SteamID: UInt64; const Ticket, PersonaName, SaveName: string);
 var
   StringList1: TStringList;
 begin
@@ -89,7 +89,7 @@ begin
     StringList1.Append('');
     StringList1.Append('[user::saves]');
     StringList1.Append('saves_folder_name=GSE Saves');
-    StringList1.SaveToFile('configs.user.ini', TEncoding.UTF8);
+    StringList1.SaveToFile(SaveName, TEncoding.UTF8);
   finally StringList1.Free end;
 end;
 
@@ -140,11 +140,16 @@ begin
   Writeln('Steam ID: ', SteamID);
   Writeln('Encrypted App Ticket: ', EncodedTicket);
 
-  Writeln('Create configs.user.ini file? [Y/N]');
-  Readln(s);
-  if (Trim(LowerCase(s)) = 'y') then begin
-    CreateConfig(SteamID, EncodedTicket, UTF8ToString(SteamAPI_ISteamFriends_GetPersonaName(SteamAPI_SteamFriends_v018)));
-    Writeln('configs.user.ini created successfully.');
+  if (ParamCount = 0) then begin
+    Writeln('Create configs.user.ini file? [Y/N]');
+    Readln(s);
+    if (Trim(LowerCase(s)) = 'y') then begin
+      CreateConfig(SteamID, EncodedTicket, UTF8ToString(SteamAPI_ISteamFriends_GetPersonaName(SteamAPI_SteamFriends_v018)), 'configs.user.ini');
+      Writeln('configs.user.ini created successfully.');
+    end;
+  end else begin
+    if (ParamCount > 1) then CreateConfig(SteamID, EncodedTicket, UTF8ToString(SteamAPI_ISteamFriends_GetPersonaName(SteamAPI_SteamFriends_v018)), ParamStr(2))
+      else CreateConfig(SteamID, EncodedTicket, UTF8ToString(SteamAPI_ISteamFriends_GetPersonaName(SteamAPI_SteamFriends_v018)), 'configs.user.ini');
   end;
 end;
 
@@ -153,8 +158,12 @@ var
   AppID: Integer;
   AppIDStr: string;
 begin
-  Write('Enter the App ID: ');
-  Readln(AppIDStr);
+  if (ParamCount > 0) then begin
+    AppIDStr := ParamStr(1);
+  end else begin
+    Write('Enter the App ID: ');
+    Readln(AppIDStr);
+  end;
   AppID := StrToIntDef(AppIDStr, 0);
   try
     GenerateTicket(AppID);
@@ -162,11 +171,12 @@ begin
     Writeln('Error while generating ticket: ', E.Message);
     Writeln('Make sure Steam is running and you own the game.');
   end end;
-  Writeln('Press Enter to exit...');
-  Readln;
+  if (ParamCount = 0) then begin
+    Writeln('Press Enter to exit...');
+    Readln;
+  end;
 end;
 
 begin
   Main;
 end.
-
